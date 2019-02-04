@@ -18,12 +18,131 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	prompt "github.com/c-bata/go-prompt"
+
 	plist "github.com/DHowett/go-plist"
 )
+
+func completer(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "major", Description: "Bump the major version"},
+		{Text: "minor", Description: "Bump the minor version"},
+		{Text: "patch", Description: "Bump the patch version (default)"},
+	}
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+}
+
+func parseProject() {
+
+	var (
+		files       = searchInfoPlists()
+		oldVersion  string
+		nextVersion string
+	)
+
+	if *flagBumpInteractive {
+		fmt.Println("v{major.minor.patch}")
+		fmt.Println("Please select what part of the version number to bump (Hit Tab for completion)")
+		fmt.Println("Hit [Enter] to select the default (patch)")
+		t := prompt.Input("> ", completer)
+		switch t {
+		case "major":
+			*flagBumpMajor = true
+		case "minor":
+			*flagBumpMinor = true
+		case "patch":
+			*flagBumpPatch = true
+		default:
+		}
+	}
+
+	for i, f := range files {
+
+		// check if the specified file has a dirty state in git
+		// before we even think about modifying it
+		if *flagGitCheck {
+			err := exec.Command("git", "diff", "--quiet", f).Run()
+			if err != nil {
+				log.Fatal("file ", f, " is in a dirty state: ", err)
+			}
+		}
+
+		// read property list file from flag
+		dict, format := readFile(f)
+
+		currentVersion := fmt.Sprint(dict[keyMarketingVersion]) + " (" + fmt.Sprint(dict[keyVersion]) + ")"
+		if oldVersion != "" && oldVersion != currentVersion {
+			log.Fatal("different versions in multiple files: ", files[i-1], " and ", f)
+		}
+		oldVersion = currentVersion
+
+		v, mv := getNextVersionNumbers(dict)
+		nextVersion = mv + " (" + v + ")"
+		if *flagNextVersion {
+			fmt.Println("would bump version from", oldVersion, "to", nextVersion)
+			return
+		}
+
+		writeVersionUpdate(dict, format, v, mv, f, oldVersion)
+	}
+
+	// commit the changes to git if the flag is set
+	if *flagCommitChanges {
+
+		// commit
+		out, err := exec.Command("git", "-m", "\"bumped version from "+oldVersion+" to "+nextVersion+"\"").CombinedOutput()
+		if err != nil {
+			log.Fatal("failed to commit changes with git:", err, out)
+		}
+	}
+}
+
+func writeVersionUpdate(dict map[string]interface{}, format int, v string, mv string, f string, oldVersion string) {
+
+	dict[keyVersion] = v
+	dict[keyMarketingVersion] = mv
+
+	// update plist
+	data, err := plist.Marshal(dict, format)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// formatted := xmlfmt.FormatXML(string(data), "", "")
+	formatted := string(data)
+	// fmt.Println(formatted)
+
+	// get a file handle and overwrite file contents
+	fh, err := os.Create(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = fh.Write([]byte(formatted))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = fh.Close()
+	if err != nil {
+		log.Fatal("failed to close file handle:", err)
+	}
+
+	fmt.Println("bumped version in", f, "from", oldVersion, "to", mv+" ("+v+")")
+
+	// add changes if they shall be committed via git
+	if *flagCommitChanges {
+		out, err := exec.Command("git", "add", f).CombinedOutput()
+		if err != nil {
+			log.Fatal("failed to add file with git:", err, out)
+		}
+	}
+}
 
 // ranges the currenty directory recursively and searches for property list from Xcode
 // prints each found path to stdout in the format: <path>: version (buildNumber)

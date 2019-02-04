@@ -34,4 +34,8 @@ var (
 	flagDir     = flag.String("dir", ".", "set directory")
 	flagList    = flag.Bool("list", false, "recursively search for plists and list them all")
 	flagListAll = flag.Bool("listall", false, "recursively search for plists and list them all")
+
+	flagBuildNumber      = flag.Bool("build-number", false, "print only build number")
+	flagMarketingVersion = flag.Bool("marketing-version", false, "print only marketing version")
+	flagBumpInteractive  = flag.Bool("bump-interactive", false, "bump version interactive")
 )
