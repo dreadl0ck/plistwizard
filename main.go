@@ -41,11 +41,10 @@ const (
 
 func main() {
 
-	println(string(logo))
-
 	// modify usage to show usage synopsis
 	originalUsage := flag.Usage
 	flag.Usage = func() {
+		println(string(logo))
 		fmt.Println("plistwizard [-plist <path/to/plist>] [-next-version] [-bump-version] [-lookup <key>]")
 		fmt.Println()
 		originalUsage()
@@ -136,6 +135,8 @@ func main() {
 			rows = append(rows, []string{key, fmt.Sprint(v)})
 		}
 	}
+
+	println(string(logo))
 
 	// print table to stdout
 	tui.Table(os.Stdout, []string{"Key", "Value"}, rows)
