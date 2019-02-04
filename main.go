@@ -41,6 +41,8 @@ const (
 
 func main() {
 
+	println(string(logo))
+
 	// modify usage to show usage synopsis
 	originalUsage := flag.Usage
 	flag.Usage = func() {

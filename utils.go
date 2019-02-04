@@ -23,9 +23,8 @@ import (
 	"strconv"
 	"strings"
 
-	prompt "github.com/c-bata/go-prompt"
-
 	plist "github.com/DHowett/go-plist"
+	prompt "github.com/c-bata/go-prompt"
 )
 
 func completer(d prompt.Document) []prompt.Suggest {
