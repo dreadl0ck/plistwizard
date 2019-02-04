@@ -8,7 +8,6 @@ builds:
   # For more info refer to: https://golang.org/doc/install/source#environment
   goos:
     - darwin
-    - windows
     - linux
 
   # GOARCH to build for.
