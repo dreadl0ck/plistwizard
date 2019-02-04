@@ -1,5 +1,13 @@
 # PLIST WIZARD
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/dreadl0ck/plistwizard)](https://goreportcard.com/report/github.com/dreadl0ck/plistwizard)
+[![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://raw.githubusercontent.com/dreadl0ck/plistwizard/master/docs/LICENSE)
+[![Golang](https://img.shields.io/badge/Go-1.11-blue.svg)](https://golang.org)
+![Linux](https://img.shields.io/badge/Supports-Linux-green.svg)
+![macOS](https://img.shields.io/badge/Supports-macOS-green.svg)
+![windows](https://img.shields.io/badge/Supports-windows-green.svg)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/dreadl0ck/plistwizard)
+
 This magically simple tool was created to parse *property list* XML files from Xcode,
 more specifically the *Info.plist* files that contain various project related information.
 
