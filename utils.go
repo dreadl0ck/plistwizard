@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"strings"
 
-	plist "github.com/DHowett/go-plist"
+	plist "howett.net/plist"
 	prompt "github.com/c-bata/go-prompt"
 )
 
